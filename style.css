@@ -1,0 +1,344 @@
+
+  body {
+    font-family:sans-serif;
+    margin:0px;
+  }
+
+  hr {
+    border-width: medium;
+    margin:0px;
+    padding:0px;
+    border-color:rgb(121,210,121);
+  }
+
+   #about {
+     text-align: center;
+     background-color:black;
+     color:white;
+     opacity: 0.6;
+     width: 650px;
+     margin-top: 3%;
+     margin-left: 25%;
+     margin-bottom: 5%;
+     padding-top:3px;
+     padding-bottom: 3px;
+   }
+
+   #employment {
+     text-align: center;
+     background-color:black;
+     color:white;
+     opacity:0.9;
+     padding-top:3px;
+     padding-bottom: 15px;
+   }
+
+  #gradDegrees {
+    text-align: center;
+    background-color:black;
+    color:white;
+    opacity:0.9;
+    padding-top:3px;
+  }
+
+  #researchByArea {
+    text-align: center;
+    background-color:white;
+    color:white;
+    opacity:0.9;
+    padding-top:3px;
+  }
+
+  #researchByFaculty {
+    background-color: black;
+    color: white;
+    padding: 3px;
+    text-align: center;
+  }
+
+  #ugDegrees {
+    overflow: hidden;
+    text-align: center;
+  }
+
+  #degreeDetails {
+    overflow: hidden;
+    text-align: center;
+  }
+
+  #advCertificates {
+    text-align: center;
+    width: 28%;
+    height: 180px;
+    padding-right: 25px;
+    padding-left: 25px;
+    margin-left: 31%;
+  }
+
+  .clickable {
+    cursor: pointer
+  }
+
+  div.degree {
+    /*display: inline-block;*/
+    float:left;
+    width: 28%;
+    height: 180px;
+    padding-right: 25px;
+    padding-left: 25px;
+  }
+
+  #ugMinors {
+    overflow: hidden;
+    text-align: center;
+    padding: 24px;
+  }
+
+  div.minor {
+    /*display: inline-block;*/
+  height: 150px;
+  width: 270px;
+  margin: 10px;
+  border: 2px solid;
+  float: left;
+  text-align: center;
+  padding: 5px;
+  box-shadow: 0px 2px 2px;
+  border-radius: 10px;
+  background-color: rgb(51,153,51);
+  color: #FFFFFF;
+  }
+
+  #people {
+    text-align: center;
+    background-color: rgb(0,0,0);
+    padding-top: 3px;
+  }
+
+  div.staffPeople, div.facultyPeople {
+    display: inline-block;
+    width: 200px;
+    height: 75px;
+    padding: 12px;
+    margin: 10px;
+    border: 2px solid;
+    box-shadow: 0px 2px 5px;
+    text-align: center;
+    background-color: rgb(146, 245, 158);
+  }
+
+
+  div.staffPeople:hover, div.facultyPeople:hover {
+    display: inline-block;
+    width: 200px;
+    height: 75px;
+    padding: 12px;
+    margin: 10px;
+    border: 2px solid;
+    box-shadow: 0px 4px 10px;
+    text-align: center;
+  }
+
+  div.researchArea {
+    display: inline-block;
+    width: 200px;
+    height: 100px;
+    margin: 10px;
+    border: 2px solid;
+    border-radius:20px;
+    box-shadow:0 0px 8px;
+    background-color: black;
+  }
+
+  div.researchArea:hover{
+    background-color: white;
+    color:black;
+  }
+
+  div.researchFaculty {
+    display: inline-block;
+    width: 200px;
+    height: 200px;
+    margin: 10px;
+    border: 2px solid;
+  }
+
+  div.coopTable {
+    text-align: center;
+    background: rgb(32,178,170);
+    float: left;
+    height: 150px;
+    width: 250px;
+    border: 2px solid;
+    border-color: lightgrey;
+    margin-left: 29%;
+    margin-right: 2%;
+    margin-bottom: 5%;
+  }
+
+  div.profTable {
+    text-align: center;
+    background: rgb(107,142,35);
+    float: left;
+    height: 150px;
+    width: 250px;
+    border: 2px solid;
+    border-color: lightgrey;
+    margin-left: 0%;
+  }
+
+  #tables {
+    overflow: hidden;
+  }
+
+  .tableHeader {
+    font-size: 20px;
+    padding: 30px;
+  }
+
+  .tableHeader:hover{
+    color: white;
+  }
+
+  #coop, #emp {
+    border-collapse: collapse;
+  }
+
+  #coop td, #coop th, #emp td, #emp th {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  #coop tr:nth-child(even){
+    background-color: rgb(242,242,242);
+  }
+
+  #coop th, #emp th{
+    background-color: rgb(64,64,64);
+    color: white;
+  }
+
+  .resource {
+    float: left;
+    padding: 10px;
+    display: block;
+    background: rgb(95,188,7);
+    border-radius: 100%;
+    height: 100px;
+    width: 140px;
+    text-align: center;
+    color: white;
+    margin: 25px;
+  }
+
+  #resources {
+    text-align: center;
+  }
+
+  #resourcesLinks {
+    overflow: hidden;
+  }
+
+  #employers, #careers {
+    overflow: hidden;
+  }
+
+  .employerName, .careerName {
+    display: inline-block;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  #innerFooter {
+    overflow: hidden;
+  }
+
+  #quickLinks, #copyrightInfo, #news {
+    float: left;
+  }
+  #navigateTrigger,#formTrigger{
+    display: inline-block;
+    float: right;
+    text-align: right;
+    margin-right: 2%;
+    cursor:pointer;
+  }
+  #navigateSideBar {
+    background-color: rgb(25,77,6);
+    height: 100%;
+    color: white;
+  }
+
+  #formFrame {
+    background-color: white;
+    height: 100%;
+  }
+
+  #formFrame a, #navigateSideBar a  {
+    color:white;
+    text-decoration: none;
+
+  }
+  #formFrame ul, #navigateSideBar ul  {
+    list-style-type: none;
+    text-align: left;
+  }
+
+  #navigateSideBar li{
+    padding:5px;
+  }
+  div.title-item{
+    color:white;
+  }
+
+  #header {
+    background-color: black;
+    color: white;
+    height: 45px;
+  }
+
+  .subTitle{
+    margin-top: -450px;
+    font-size: 40px;
+  }
+
+
+  .headerTitle{
+    display: inline-block;
+    font-size: 25px;
+    padding: 5px;
+    padding-left: 25px;
+  }
+
+  #map {
+    height: 600px;
+    width: 1000px;
+    margin-bottom: 20px;
+  }
+
+  #employmentLocations {
+    text-align: center;
+  }
+
+  #footer {
+    background-color: black;
+    color: white;
+    text-align: center;
+    padding: 3px;
+  }
+
+  #footer ul, #footer a{
+    list-style-type: none;
+    color: white;
+    text-decoration: none;
+  }
+
+  #quickLinks, #news {
+    width: 25%;
+  }
+
+  #subHeader {
+    text-align: center;
+    background-color: lightgreen;
+    height: 570px;
+  }

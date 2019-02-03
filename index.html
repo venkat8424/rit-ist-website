@@ -1,0 +1,627 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+
+  <link href="featherlight/featherlight.min.css" type="text/css" rel="stylesheet"/>
+  <link href="style.css" type="text/css" rel="stylesheet">
+
+  <script src="https://code.jquery.com/jquery-latest.js" type="text/javascript"></script>
+  <script src="featherlight/featherlight.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="simpler-sidebar.js" type="text/javascript"></script>
+  <script src="jquery.glowspot.min.js" type="text/javascript"></script>
+  <script src="jquery.particleground.min.js" type="text/javascript"></script>
+  <script src="jquery.browser.js"></script>
+
+  <script type = "text/javascript">
+
+    $(document).ready(function(){
+      // detecting old browsers
+      if($.browser.msie && $.browser.version < "9"){
+        window.location = "oldBrowsers.html"
+      }
+      //building the header
+      $('#header').append('<div class = "headerTitle">Rochester Institute of Technology</div>');
+      $('#header').append('<div id = "navigateTrigger"><h4>Navigate</h4></div>');
+      // content for the navigate sidebar
+      var navigateSideBarContent = '<div id = "navigateSideBar" data-simplersidebar = "opened">';
+      navigateSideBarContent += '<ul>';
+      navigateSideBarContent += '<li><a href = "#about">About Us</a></li>';
+      navigateSideBarContent += '<li>Our Degrees</li>';
+      navigateSideBarContent += '<ul>';
+      navigateSideBarContent += '<li><a href = "#ugDegrees">Undergraduate</a></li>';
+      navigateSideBarContent += '<li><a href = "#gradDegrees">Graduate</a></li>';
+      navigateSideBarContent += '<li><a href = "#ugMinors">Minors</a></li>';
+      navigateSideBarContent += '</ul>';
+      navigateSideBarContent += '<li>Employment Statistics</li>';
+      navigateSideBarContent += '<ul>';
+      navigateSideBarContent += '<li><a href = "#employment">Career Information</a></li>';
+      navigateSideBarContent += '<li><a href = "#employmentLocations">Career Locations</a></li>';
+      navigateSideBarContent += '</ul>';
+      navigateSideBarContent += '<li>People and Research</li>';
+      navigateSideBarContent += '<ul>';
+      navigateSideBarContent += '<li><a href = "#people">People</a></li>';
+      navigateSideBarContent += '<li><a href = "#researchByArea">Research By Interest Area</a></li>';
+      navigateSideBarContent += '<li><a href = "#researchByFaculty">Research By Faculty</a></li>';
+      navigateSideBarContent += '</ul>';
+      navigateSideBarContent += '<li><a href = "#resources">Resources</a></li>';
+      navigateSideBarContent += '<li><a href = "#copyrightInfo">Copyright</a></li>';
+      navigateSideBarContent += '</ul>';
+      navigateSideBarContent += '</div>';
+      var navigateSideBar = $(navigateSideBarContent);
+      $('#header').append(navigateSideBar);
+
+      // appending the side bar to the trigger element
+      $('#navigateSideBar').simplerSidebar({
+        selectors: {
+          trigger: '#navigateTrigger',
+          quitter: '.close-sb'
+        }
+      });
+
+      $('#header').append('<div id  = "formTrigger"><h4>Contact</h4></div>');
+      $('#header').append('<div id = "formSideBar" data-simplersidebar = "opened">');
+      $('#formSideBar').append('<iframe id = "formFrame">');
+      // getting contactForm
+      $.ajax({
+        cache:false,
+        async:true,
+        url:'proxy.php',
+        type:'get',
+        dataType:'html',
+        data:{path:'/contactForm/'},
+        beforeSend:function(){
+          $('#header').append('<img src="gears.gif" class="spin"/>');
+        }
+      }).always(function(){
+        // will be triggered when the object is either resolved (done) or rejected (fail)
+          $('#header').find('.spin').fadeOut(500,function(){
+            $(this).remove();
+          });
+      }).fail(function(error){
+          console.log(error);
+      }).done(function(form){
+        //getting the content of the contact form
+        var styleStart = form.indexOf("<style");
+        styleStart = form.indexOf(">",styleStart);
+        var styleEnd = form.indexOf("</style");
+        var head = '<style type="text/css"'+'>'+form.slice(styleStart+1,styleEnd)+'</style'+'>';
+        var scriptStart = form.indexOf("<script");
+        var body = form.slice(styleEnd+8, scriptStart);
+        scriptStart=form.indexOf(">",scriptStart);
+        var scriptEnd=form.indexOf("</script");
+        head+='<script type="text/javascript"'+'>'+form.slice(scriptStart+1,scriptEnd)+'</script'+'>';
+
+        var scriptStart1 = form.indexOf("<script",scriptEnd);
+        scriptStart1=form.indexOf(">",scriptStart1);
+        var scriptEnd1=form.indexOf("</script",scriptStart1);
+        head+='<script type="text/javascript"'+'>'+form.slice(scriptStart1+1,scriptEnd1)+'</script'+'>';
+        body+=form.slice(scriptEnd+9,scriptStart1-7);
+
+        $('#formFrame').contents().find("head").append(head);
+        $('#formFrame').contents().find("body").append(body);
+      });
+
+      // appending the contact form sidebar to the trigger
+      $('#formSideBar').simplerSidebar({
+        selectors: {
+          trigger: '#formTrigger',
+          quitter: '.close-sb'
+        }
+      });
+
+      //subHeader
+      $('#subHeader').append('<div class = "subTitle">Information Sciences and Technologies @ RIT</div>');
+
+      //getting about
+      getData('get', {path:"/about/"}, "#about").done(function(json){
+        var author = json.quoteAuthor;
+        $('#subHeader').append('<div id = "about">');
+        $('#about').append('<h2 id = "sample"><span style = "color:rgb(198,236,198)">'+json.title+'</span></h2>');
+        $('#about').append("<p>"+json.description+"</p>");
+        $('#about').append('<p>'+'"'+json.quote+'"'+'</p>');
+        $('#about').append('<p><i>'+'- '+json.quoteAuthor+'</i></p>')
+        // displaying the animation on the background of subheader
+        $('#subHeader').particleground();
+      });
+
+      //getting undergraduate degrees
+      getData('get', {path:"/degrees/undergraduate/"}, "#ugDegrees").done(function(json){
+        $('#ugDegrees').append('<h2><span style = "color:rgb(25,77,6)">Undergraduate Degrees</span></h2>');
+        var degrees = json.undergraduate;
+        $.each(degrees, function(){
+          // main content for the degree
+          var content = $('<div class = "degree clickable"><h3>'+this.title+'</h3><p>'+this.description+'</p></div>');
+          var concentrations = this.concentrations;
+          var list = '<ul>';
+          for(var i=0; i<concentrations.length; i++){
+            list += ('<li>' + concentrations[i] + '</li>');
+          }
+          list += '</ul>';
+          // content for the lightboxContent
+          var lightbox = $('<div><h3>'+this.title+'</h3>'+list+'</div>');
+          // appending the lightbox
+          content.featherlight(lightbox);
+          $('#ugDegrees').append(content);
+        })
+      });
+
+      //getting graduate degrees
+      getData('get', {path:"/degrees/graduate/"}, "#gradDegrees").done(function(json){
+        $('#gradDegrees').append('<h2><span style = "color:rgb(198,236,198)">Graduate Degrees</span></h2>');
+        $('#gradDegrees').append('<div id = "degreeDetails"></div>');
+        var degrees = json.graduate;
+        $.each(degrees, function(i){
+          if (i < degrees.length - 1){
+            var content = $('<div class = "degree clickable"><h3>'+this.title+'</h3><p>'+this.description+'</p></div>');
+            var concentrations = this.concentrations;
+            var list = '<ul>';
+            for(var j=0; j<concentrations.length; j++){
+              list += ('<li>' + concentrations[j] + '</li>');
+            }
+            list += '</ul>';
+            var lightbox = $('<div><h3>'+this.title+'</h3>'+list+'</div>');
+            content.featherlight(lightbox);
+            $('#degreeDetails').append(content);
+          }
+          else{
+            //getting advanced certificates
+            $('#gradDegrees').append('<div id = "advCertificates"></div>');
+            $('#advCertificates').append("<h3>Graduate Advanced Certificates</h3>");
+            advCertis = this.availableCertificates;
+            var list = '<ul>';
+            for(var j=0; j<advCertis.length; j++){
+              list += ('<li>' + advCertis[j] + '</li>');
+            }
+            list += '</ul>';
+            $('#advCertificates').append(list);
+          }
+        })
+      });
+
+      //getting undergraduate minors
+      getData('get', {path:"/minors/"}, "#ugMinors").done(function(json){
+        $('#ugMinors').append('<h2><span style = "color:rgb(25,77,6)">Undergraduate Minors</span></h2>');
+        var minors = json.UgMinors;
+        $.each(minors, function(){
+          var content = $('<div class = "minor clickable"><h3>'+this.title+'</h3></div>');
+          var lightboxContent = '<div><h3>'+this.title+'</h3><p>'+this.description+'</p>';
+          var courses = this.courses;
+          var list = '<ul>';
+          for(var i=0; i<courses.length; i++){
+            list += ('<li>' + courses[i] + '</li>');
+          }
+          list += '</ul>';
+          lightboxContent += list;
+          var lightbox = $(lightboxContent);
+          content.featherlight(lightbox);
+          $('#ugMinors').append(content);
+        })
+        // using glowspot to highlight the content on hover
+        $('.minor').glowspot({colour:'204,255,153'})
+      });
+
+      //getting employment information
+      getData('get', {path:"/employment/"}, "#employment").done(function(json){
+        $('#employment').append('<h2><span style = "color:rgb(198,236,198)">'+json.introduction.title+'</span></h2>');
+        var types = json.introduction.content;
+        $.each(types, function(){
+          var title = this.title;
+          var description = this.description;
+          $('#employment').append('<div><h3>'+title+'</h3><p>'+description+'</p></div>');
+        })
+        //getting employers
+        $('#employment').append('<div id = "employers"></div>');
+        $('#employers').append('<h4><span style = "color:rgb(120,153,245);padding:8px;border-bottom:2px solid;">EMPLOYERS</span></h4>')
+        var employers = json.employers.employerNames;
+        for(var i=0; i<employers.length; i++){
+          $('#employers').append('<h5 class = "employerName">'+employers[i]+'</h5>');
+        }
+        //getting careers
+        $('#employment').append('<div id = "careers"></div>');
+        $('#employers').append('<h4><span style = "color:rgb(120,153,245);padding:8px;border-bottom:2px solid;">CAREERS</span></h4>');
+        var careers = json.careers.careerNames;
+        for(var i=0; i<careers.length; i++){
+          $('#careers').append('<h5 class = "careerName">'+careers[i]+'</h5>');
+        }
+        //employment table and map
+        $('#employmentLocations').append('<h2><span style = "color:rgb(25,77,6)">Where our students work</span></h2>');
+        //building the map
+        /*$('#employmentLocations').append('<div id = "mapContainer"></div>');
+        $('#mapContainer').append('<iframe id = "map" src = "https://ist.rit.edu/api/map/"></iframe>');*/
+        /*
+        $.ajax({
+          cache:false,
+          async:true,
+          url:'proxy.php',
+          type:'get',
+          dataType:'html',
+          data:{path:'/map/'},
+          beforeSend:function(){
+            $('#map').append('<img src="gears.gif" class="spin"/>');
+          }
+        }).always(function(){
+          //remove spinner?
+          // will be triggered when the object is either resolved (done) or rejected (fail)
+            $('#map').find('.spin').fadeOut(500,function(){
+              $(this).remove();
+            });
+        }).fail(function(error){
+            console.log(error);
+        }).done(function(map){
+          var headStart = map.indexOf("<head");
+          headStart = map.indexOf(">",headStart);
+          var headEnd = map.lastIndexOf("</head>");
+          var head = map.slice(headStart+1,headEnd);
+
+          var bodyStart = map.indexOf("<body");
+          bodyStart = map.indexOf(">",bodyStart);
+          var bodyEnd = map.lastIndexOf("</body>");
+          var body = map.slice(bodyStart+1,bodyEnd);
+
+          var scriptStart = map.indexOf("<script");
+          var script = map.slice(scriptStart);
+
+          $('#map').contents().find("head").append(head);
+          $('#map').contents().find("body").append(body);
+          $('#map').contents().find("head").append(script);
+        });*/
+
+        //tables
+        $('#employmentLocations').append('<div id = "tables"></div>')
+        //building the coop table
+        var coopInfo = json.coopTable.coopInformation;
+        var content = $('<div class = "coopTable clickable"><div class = "tableHeader">Co-op Table</div></div>');
+        var lightboxContent = '<h3>Student Coop Jobs</h3>';
+        lightboxContent += '<table id="coop">';
+        lightboxContent += '<tr><th>Employer</th><th>Degree</th><th>Location</th><th>Term</th></tr>';
+        $.each(coopInfo, function(){
+          lightboxContent += '<tr>';
+          lightboxContent += '<td>'+this.employer+'</td>';
+          lightboxContent += '<td>'+this.degree+'</td>';
+          lightboxContent += '<td>'+this.city+'</td>';
+          lightboxContent += '<td>'+this.term+'</td>';
+          lightboxContent += '</tr>'
+        })
+        lightboxContent += '</table>';
+        var lightbox = $(lightboxContent);
+        content.featherlight(lightbox);
+        $('#tables').append(content);
+        $('.coopTable').glowspot({colour:'0,102,102'});
+
+        //building the professional employment table
+        var empInfo = json.employmentTable.professionalEmploymentInformation;
+        var content = $('<div class = "profTable clickable"><div class = "tableHeader">Professional Employment Table</div></div>');
+        var lightboxContent = '<h3>Graduating Student Employment</h3>';
+        lightboxContent += '<table id="emp">';
+        lightboxContent += '<tr><th>Employer</th><th>Degree</th><th>Location</th><th>Title</th><th>Start Date</th></tr>';
+        $.each(empInfo, function(){
+          lightboxContent += '<tr>';
+          lightboxContent += '<td>'+this.employer+'</td>';
+          lightboxContent += '<td>'+this.degree+'</td>';
+          lightboxContent += '<td>'+this.city+'</td>';
+          lightboxContent += '<td>'+this.title+'</td>';
+          lightboxContent += '<td>'+this.startDate+'</td>';
+          lightboxContent += '</tr>'
+        })
+        lightboxContent += '</table>';
+        var lightbox = $(lightboxContent);
+        content.featherlight(lightbox);
+        $('#tables').append(content);
+        $('.profTable').glowspot({colour:'51,102,0'});
+      });
+
+      //getting people information
+      getData('get', {path:'/people/'}, "#people").done(function(json){
+        //getting faculty information
+        $('#people').append('<div id = "faculty"><h2><span style = "color:rgb(198,236,198)">Faculty</span></h2></div>');
+        var faculty = json.faculty;
+        $.each(faculty, function(){
+          var content = $('<div class = "facultyPeople clickable"><h5>'+this.name+'</h5></div>');
+          var lightboxContent = '<div><h3>'+this.name+'</h3>'
+          lightboxContent += '<img src = '+this.imagePath+'>';
+          lightboxContent += '<h5> office: '+this.office+'</h5>';
+          lightboxContent += '<h5> phone: '+this.phone+'</h5>';
+          lightboxContent += '<h5> email: '+this.email+'</h5></div>';
+          var lightbox = $(lightboxContent);
+          content.featherlight(lightbox);
+          $('#faculty').append(content);
+        })
+        //getting staff information
+        $('#people').append('<div id = "staff"><h2><span style = "color:rgb(198,236,198)">Staff</span></h2></div>');
+        var staff = json.staff;
+        $.each(staff, function(){
+          var content = $('<div class = "staffPeople clickable"><h5>'+this.name+'</h5></div>');
+          var lightboxContent = '<div><h3>'+this.name+'</h3>'
+          lightboxContent += '<img src = '+this.imagePath+'>';
+          lightboxContent += '<h5> office: '+this.office+'</h5>';
+          lightboxContent += '<h5> phone: '+this.phone+'</h5>';
+          lightboxContent += '<h5> email: '+this.email+'</h5></div>';
+          var lightbox = $(lightboxContent);
+          content.featherlight(lightbox);
+          $('#staff').append(content);
+        })
+      });
+
+      //getting research by area
+      getData('get', {path:'/research/byInterestArea/'}, '#researchByArea').done(function(json){
+        $('#researchByArea').append('<h2><span style = "color:rgb(25,77,6)">Faculty Research: Areas of Interest</span></h2>');
+        var areas = json.byInterestArea;
+        $.each(areas, function(){
+          var content = $('<div class = "researchArea clickable"><h3>'+this.areaName+'</h3></div>');
+          var citations = this.citations;
+          var lightboxContent = '<div><h4>'+this.areaName+'</h4></div>';
+          lightboxContent += '<ul>';
+          for(var i=0; i<citations.length; i++){
+            lightboxContent += '<li>'+citations[i]+'</li>';
+          }
+          lightboxContent += '</ul>';
+          var lightbox = $(lightboxContent);
+          content.featherlight(lightbox);
+          $('#researchByArea').append(content);
+        })
+      })
+
+      //getting research by faculty
+      getData('get', {path:'/research/byFaculty/'}, '#researchByFaculty').done(function(json){
+        $('#researchByFaculty').append('<h2><span style = "color:rgb(198,236,198)">Faculty Research: Lookup by faculty</span></h2>');
+        var areas = json.byFaculty;
+        $.each(areas, function(){
+          var content = $('<div class = "researchFaculty clickable"><img src = "https://ist.rit.edu/assets/img/people/'+this.username+'.jpg" height="150px" width="200px"><h3>'+this.facultyName+'</h3></div>');
+          var citations = this.citations;
+          var lightboxContent = '<div><h4>'+this.facultyName+'</h4></div>';
+          lightboxContent += '<ul>';
+          for(var i=0; i<citations.length; i++){
+            lightboxContent += '<li>'+citations[i]+'</li>';
+          }
+          lightboxContent += '</ul>';
+          var lightbox = $(lightboxContent);
+          content.featherlight(lightbox);
+          $('#researchByFaculty').append(content);
+        })
+      })
+
+      //getting resources
+      getData('get', {path:'/resources/'}, '#resources').done(function(json){
+        $('#resources').append('<h2><span style = "color:rgb(25,77,6)">'+json.title);
+        $('#resources').append('<h3><span style = "color:rgb(25,77,6)">'+json.subTitle);
+        $('#resources').append('<div id = "resourcesLinks"></div>');
+        //study abroad content
+        var studyAbroad = json.studyAbroad;
+        var content = $('<div class = "resource clickable"><h4>'+studyAbroad.title+'</h4></div>');
+        var lightboxContent = '<div><h3>'+studyAbroad.title+'</h3>';
+        lightboxContent += '<p>'+studyAbroad.description+'</p>';
+        $.each(studyAbroad.places, function(){
+          lightboxContent += '<h4>'+this.nameOfPlace+'</h4>';
+          lightboxContent += '<p>'+this.description+'</p>';
+        })
+        lightboxContent += '</div>';
+        var lightbox = $(lightboxContent);
+        content.featherlight(lightbox);
+        $('#resourcesLinks').append(content);
+
+        //student advising services
+        var advServices = json.studentServices;
+        var content = $('<div class = "resource clickable"><h4>Student Advising Services</h4></div>');
+        var lightboxContent = '<div><h3>Student Advising Services</h3>';
+        lightboxContent += '<h4>'+advServices.academicAdvisors.title+'</h4>';
+        lightboxContent += '<p>'+advServices.academicAdvisors.description+'</p>';
+        lightboxContent += '<h4>'+advServices.professonalAdvisors.title+'</h4>';
+        $.each(advServices.professonalAdvisors.advisorInformation, function(){
+          lightboxContent += '<p>'+this.name+' (<a href = "'+this.email+'">'+this.email+'</a>): '+this.department+'</p><br>';
+        })
+        lightboxContent += '<h4>Faculty Advisors</h4>';
+        lightboxContent += '<p>'+advServices.facultyAdvisors.description+'</p>';
+        lightboxContent += '<h4>IST Minor Advising</h4>';
+        $.each(advServices.istMinorAdvising.minorAdvisorInformation, function(){
+          lightboxContent += '<p>'+this.advisor+'(<a href = "'+this.email+'">'+this.email+'</a>): '+this.title+'</p><br>';
+        })
+        lightboxContent += '</div>';
+        var lightbox = $(lightboxContent);
+        content.featherlight(lightbox);
+        $('#resourcesLinks').append(content);
+
+        //tutoring and labs
+        var tutoring = json.tutorsAndLabInformation;
+        var content = $('<div class = "resource clickable"><h4>Tutoring and Lab information</h4></div>');
+        var lightboxContent = '<div><h3>Tutoring and Lab information</h3>';
+        lightboxContent += '<p>'+tutoring.description+'</p><br>';
+        lightboxContent += '<p>The information about labs can be found <a href = "'+tutoring.tutoringLabHoursLink+'">here</a>.</p></div>';
+        var lightbox = $(lightboxContent);
+        content.featherlight(lightbox);
+        $('#resourcesLinks').append(content);
+
+        //student ambassadors
+        var studentAmbassadors = json.studentAmbassadors;
+        var content = $('<div class = "resource clickable"><h4>Student Ambassadors</h4></div>');
+        var lightboxContent = '<div><h3>Student Ambassadors</h3>';
+        $.each(studentAmbassadors.subSectionContent, function(){
+          lightboxContent += '<h4>'+this.title+'</h4>';
+          if (this.title == "Mission Statement" || this.title == "Overview" || this.title == "Expectations"){
+            lightboxContent += '<p>'+this.description+'</p>';
+          }
+          else if (this.title == "Criteria"){
+            var description = this.description.split(". ");
+            lightboxContent += '<ul>';
+            for(var i=0; i<description.length; i++){
+              lightboxContent += '<li>'+description[i]+'</li>';
+            }
+            lightboxContent += '</ul>';
+          }
+          else if(this.title == "Duties"){
+            var description = this.description.split(": ");
+            lightboxContent += '<p>'+description[0]+'</p><br>';
+            lightboxContent += '<ul>';
+            var duties = description[1].split(". ");
+            for(var i=0; i<duties.length; i++){
+              if (duties[i].includes(":")){
+                var temp = duties[i].split(":");
+                lightboxContent += '<li>'+temp[0]+'</li>';
+                lightboxContent += '<ul>';
+                for(var j=1; j<temp.length; j++){
+                  lightboxContent += '<li>'+temp[j]+'</li>';
+                }
+                lightboxContent += '</ul>';
+              }
+              else{
+                lightboxContent += '<li>'+duties[i]+'</li>';
+              }
+            }
+            lightboxContent += '</ul>';
+          }
+          else if(this.title == "Perks"){
+            var description = this.description.split(". ");
+            lightboxContent += '<ul>';
+            for(var i=0; i<description.length; i++){
+              lightboxContent += '<li>'+description[i]+'</li>';
+            }
+            lightboxContent += '</ul>';
+          }
+          else if(this.title == "apply"){
+            lightboxContent += '<p>'+this.description+' The application form can be found <a href = "'+studentAmbassadors.applicationFormLink+'">here.</a></p>';
+          }
+        })
+        lightboxContent += '<p>'+studentAmbassadors.note+'</p>';
+        lightboxContent += '</div>';
+        var lightbox = $(lightboxContent);
+        content.featherlight(lightbox);
+        $('#resourcesLinks').append(content);
+
+        // getting forms
+        var forms = json.forms;
+        var content = $('<div class = "resource clickable"><h4>Forms</h4></div>');
+        var lightboxContent = '<div><h3>Forms</h3>';
+        lightboxContent += '<h4>Undergraduate</h4>';
+        lightboxContent += '<ul><li><a href = "'+forms.undergraduateForms[0].href+'">'+forms.undergraduateForms[0].formName+'</a></li></ul>';
+        lightboxContent += '<h4>Graduate</h4>';
+        lightboxContent += '<ul><li><a href = "'+forms.graduateForms[0].href+'">'+forms.graduateForms[0].formName+'</a></li>';
+        lightboxContent += '<li>Graduate Project Capstone</li>';
+        lightboxContent += '<ul><li><a href = "'+forms.graduateForms[1].href+'">'+forms.graduateForms[1].formName+'</a></li>';
+        lightboxContent += '<li><a href = "'+forms.graduateForms[2].href+'">'+forms.graduateForms[2].formName+'</a></li>';
+        lightboxContent += '<li><a href = "'+forms.graduateForms[3].href+'">'+forms.graduateForms[3].formName+'</a></li>';
+        lightboxContent += '<li><a href = "'+forms.graduateForms[5].href+'">'+forms.graduateForms[5].formName+'</a></li>';
+        lightboxContent += '<li><a href = "'+forms.graduateForms[6].href+'">'+forms.graduateForms[6].formName+'</a></li></ul></ul>';
+        lightboxContent += '</div>';
+        var lightbox = $(lightboxContent);
+        content.featherlight(lightbox);
+        $('#resourcesLinks').append(content);
+
+        //coop enrollment
+        var coop = json.coopEnrollment;
+        var content = $('<div class = "resource clickable"><h4>Coop-Enrollment</h4></div>');
+        var lightboxContent = '<div><h3>Coop-Enrollment</h3>';
+        $.each(coop.enrollmentInformationContent, function(){
+          if (this.title == "Pre-requisites"){
+            lightboxContent += '<h4>'+this.title+'</h4>';
+            var temp = this.description.split(": ");
+            lightboxContent += '<p>'+temp[0]+'</p>';
+            var prereqs = (temp[1]+'. '+temp[2]).split(". ");
+            lightboxContent += '<ul>';
+            for(var i=0; i<prereqs.length; i++){
+              lightboxContent += '<li>'+prereqs[i]+'</li>';
+            }
+            lightboxContent += '</ul>';
+          }
+          else{
+            lightboxContent += '<h4>'+this.title+'</h4>';
+            lightboxContent += '<p>'+this.description+'<p>';
+          }
+        })
+        lightboxContent += '<p>Click <a href = "'+coop.RITJobZoneGuidelink+'">here</a> to visit RIT JobZone.</p>';
+        lightboxContent += '</div>';
+        var lightbox = $(lightboxContent);
+        content.featherlight(lightbox);
+        $('#resourcesLinks').append(content);
+      })
+
+      //adding the footer
+      getData('get', {path:'/footer/'}, '#footer').done(function(json){
+        var social = json.social;
+        $('#footer').append('<h2><span style = "color:rgb(198,236,198)">'+social.title);
+        $('#footer').append('<p>'+social.tweet+'</p>');
+        $('#footer').append('<p>'+social.by+'</p>');
+        $('#footer').append('<div id = "logos">');
+        $('#logos').append('<a href = "'+social.twitter+'"><img src = "images/twitter_logo" height = "100px" width = "100px"></a>');
+        $('#logos').append('<a href = "'+social.facebook+'"><img src = "images/facebook_logo" height = "100px" width = "100px"></a>');
+        $('#footer').append('<div id = "innerFooter">');
+        $('#innerFooter').append('<div id = "quickLinks">');
+        $('#innerFooter').append('<div id = "copyrightInfo">');
+        $('#innerFooter').append('<div id = "news">');
+        var quickLinks = json.quickLinks;
+        var content = '<ul>';
+        $.each(quickLinks, function(){
+          content += '<li><a href = "'+this.href+'">'+this.title+'</a></li>';
+        })
+        content += '</ul>';
+        content = $(content);
+        $('#quickLinks').append(content);
+        $('#copyrightInfo').append(json.copyright.html);
+      });
+
+      //getting news and adding it to the footer
+      getData('get', {path:'/news/'}).done(function(json){
+        var newsOlder = json.older;
+        $('#news').append('<h3>News</h3>');
+        var content = '<h4 class = "clickable">All news</h4>';
+        content = $(content);
+        var lightboxContent = '<div>';
+        $.each(newsOlder, function(){
+          lightboxContent += '<h3>'+this.title+'</h3>';
+          lightboxContent += '<p>'+this.description+'</p>';
+        })
+        lightboxContent += '</div>';
+        var lightbox = $(lightboxContent);
+        content.featherlight(lightbox);
+        $('#news').append(content);
+      });
+    });
+
+    function getData(getPost, d, idForSpinner){
+      return $.ajax({
+        cache:false,
+        async:true,
+        url:'proxy.php',
+        type:getPost,
+        dataType:'json',
+        data:d,
+        beforeSend:function(){
+          $(idForSpinner).append('<img src="gears.gif" class="spin"/>');
+        }
+      }).always(function(){
+        //remove spinner?
+        // will be triggered when the object is either resolved (done) or rejected (fail)
+          $(idForSpinner).find('.spin').fadeOut(500,function(){
+            $(this).remove();
+          });
+        }).fail(function(error){
+            console.log(error);
+          });
+    }
+  </script>
+</head>
+
+<body>
+  <div id = "header"></div>
+  <div id = "subHeader"></div>
+  <hr>
+  <div id = "ugDegrees"></div>
+  <hr>
+  <div id = "gradDegrees"></div>
+  <hr>
+  <div id = "ugMinors"></div>
+  <hr>
+  <div id = "employment"></div>
+  <hr>
+  <div id = "employmentLocations"></div>
+  <hr>
+  <div id = "people"></div>
+  <hr>
+  <div id = "researchByArea"></div>
+  <hr>
+  <div id = "researchByFaculty"></div>
+  <hr>
+  <div id = "resources"></div>
+  <hr>
+  <div id = "footer"></div>
+  <hr>
+</body>
